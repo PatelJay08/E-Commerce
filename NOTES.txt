@@ -1,0 +1,88 @@
+# NAMES OF ALL SERVICES AND THEIR PORT NO
+
+-->eureka-server
+http://localhost:8761
+
+-->api-gateway
+http://localhost:8765
+
+-->user-service
+http://localhost:8000         /user-service/user/login
+
+-->product-catalog-service
+http://localhost:8100         /product-catalog-service/product/all
+
+-->order-service
+http://localhost:8200         /order-service/place-order
+
+
+=============================>> URLS <===================================
+
+# SERVICE SPECIFIC URLS
+
+-->user-service
+http://localhost:8000/user-service/user/login
+
+-->product-catalog-service
+
+**GET**
+http://localhost:8100/product-catalog-service/product/all
+http://localhost:8100/product-catalog-service/product/catagory/electronics
+
+
+**POST**
+http://localhost:8100/product-catalog-service/product/new
+
+
+-->order-service
+
+POST -> http://localhost:8200/order-service/place-order
+BODY ->
+        {
+        "orderNumber":140803,
+        "orderItems":[
+            {
+            "id":5456,
+            "name":"Shoes",
+            "price":500,
+            "quantity":50
+            },
+            {
+            "id":1542,
+            "name":"Iphone 13",
+            "price":10500,
+            "quantity":10
+            }
+        ]
+        }
+
+# API GATEWAY URLS:
+
+-->user-service
+http://localhost:8765/user-service/user/login
+
+-->product-catalog-service
+http://localhost:8765/product-catalog-service/product/all
+http://localhost:8765/product-catalog-service/product/catagory/electronics
+
+-->order-service
+POST -> http://localhost:8765/order-service/place-order
+
+BODY ->
+        {
+          "orderNumber":140804,
+          "orderItems":[
+            {
+              "productId":5456,
+              "name":"Shoes",
+              "price":500,
+              "quantity":5
+            },
+            {
+              "productId":1542,
+              "name":"Iphone 13",
+              "price":10500,
+              "quantity":5
+            }
+          ]
+        }
