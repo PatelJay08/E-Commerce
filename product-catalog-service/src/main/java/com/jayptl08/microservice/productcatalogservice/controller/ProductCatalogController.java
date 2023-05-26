@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.jayptl08.microservice.productcatalogservice.dto.OrderItemReq;
+import com.jayptl08.microservice.productcatalogservice.dto.StockCheckRes;
 import com.jayptl08.microservice.productcatalogservice.model.ProductCatalog;
 import com.jayptl08.microservice.productcatalogservice.service.ProductCatalogService;
 
@@ -61,7 +62,7 @@ public class ProductCatalogController {
 
     @PostMapping("/product/stock/check")
     @ResponseStatus(HttpStatus.OK)
-    public boolean checkStock(@RequestBody List<OrderItemReq> orderItems) {
+    public List<StockCheckRes> checkStock(@RequestBody List<OrderItemReq> orderItems) {
         return service.checkStock(orderItems);
     }
 

@@ -13,6 +13,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.jayptl08.microservice.orderservice.Proxy.ProductCatalogProxy;
 import com.jayptl08.microservice.orderservice.dto.OrderItemReq;
+import com.jayptl08.microservice.orderservice.dto.StockCheckRes;
+import com.jayptl08.microservice.orderservice.dto.StockCheckResClient;
 import com.jayptl08.microservice.orderservice.model.OrderItems;
 import com.jayptl08.microservice.orderservice.model.Orders;
 import com.jayptl08.microservice.orderservice.service.OrderService;
@@ -27,12 +29,44 @@ public class OrderController {
     private OrderService service;
 
     @PostMapping("/place-order")
-    public void placeOrder(@RequestBody Orders orders) {
-        if(productCatalogProxy.checkStockInProductCatalog(converter(orders.getOrderItems()))){
+    public StockCheckResClient placeOrder(@RequestBody Orders orders) {
+        // if(productCatalogProxy.checkStockInProductCatalog(converter(orders.getOrderItems()))){
+        // if (updateStockInProductCatalog(orders.getOrderItems())) {
+        // service.placeOrder(orders);
+        // }
+        // }
+
+        List<StockCheckRes> stockCheckRes = productCatalogProxy
+                .checkStockInProductCatalog(converter(orders.getOrderItems()));
+
+        List<StockCheckRes> rejectedItems = new ArrayList<>();
+        StockCheckResClient stockCheckResClients = new StockCheckResClient(false, null);
+
+        int j = 0;
+        for (int i = 0; i < stockCheckRes.size(); i++) {
+
+            if (stockCheckRes.get(i).getQuantity() > stockCheckRes.get(i).getStock()) {
+                stockCheckResClients.setCompleted(false);
+                rejectedItems.add(stockCheckRes.get(i));
+                j++;
+            }
+
+            else if (stockCheckRes.get(i).getQuantity() <= stockCheckRes.get(i).getStock()) {
+                if (j <= 0) {
+                    stockCheckResClients.setCompleted(true);
+                }
+
+            }
+            stockCheckResClients.setStockCheckRes(rejectedItems);
+        }
+
+        if (j <= 0) {
             if (updateStockInProductCatalog(orders.getOrderItems())) {
                 service.placeOrder(orders);
             }
         }
+
+        return stockCheckResClients;
     }
 
     @GetMapping("/id/{id}")
@@ -40,7 +74,7 @@ public class OrderController {
         return service.getOrders(id);
     }
 
-    public boolean updateStockInProductCatalog(List<OrderItems> orderItems) {
+    private boolean updateStockInProductCatalog(List<OrderItems> orderItems) {
         List<OrderItemReq> orderItemsreq = converter(orderItems);
         return productCatalogProxy.updateStockInProductCatalog(orderItemsreq);
     }
@@ -53,7 +87,7 @@ public class OrderController {
                     orderItems.get(i).getName(),
                     orderItems.get(i).getPrice(),
                     orderItems.get(i).getQuantity());
-                    orderItemsreq.add(i, orderItemReq1);
+            orderItemsreq.add(i, orderItemReq1);
         }
         return orderItemsreq;
     }

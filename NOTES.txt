@@ -1,3 +1,7 @@
+
+# TO BUILD DOCKER IMAGE 
+sudo mvn spring-boot:build-image -DskipTests
+
 # NAMES OF ALL SERVICES AND THEIR PORT NO
 
 -->eureka-server
@@ -5,6 +9,17 @@ http://localhost:8761
 
 -->api-gateway
 http://localhost:8765
+
+-->zipkin-server
+http://localhost:9411
+
+-->prometheus
+PORT:9090
+
+-->grafana
+PORT:3100
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=password
 
 -->user-service
 http://localhost:8000         /user-service/user/login

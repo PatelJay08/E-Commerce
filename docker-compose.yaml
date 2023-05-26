@@ -1,0 +1,94 @@
+version: '3.7'
+
+services:
+  
+  product-catalog-service:
+    image: jayptl08/microservices/e-commerce-product-catalog-service:0.0.1-SNAPSHOT
+    mem_limit: 700m
+    ports:
+      - "8100:8100"
+    networks:
+      - ecommerce-network
+    depends_on:
+      - eureka-server
+    environment:
+      EUREKA.CLIENT.SERVICEURL.DEFAULTZONE: http://eureka-server:8761/eureka
+      SPRING.H2.CONSOLE.SETTINGS.WEB-ALLOW-OTHERS: true
+      # SPRING.ZIPKIN.BASEURL: http://zipkin-server:9411/
+
+  order-service:
+    image: jayptl08/microservices/e-commerce-order-service:0.0.1-SNAPSHOT
+    mem_limit: 700m
+    ports:
+      - "8200:8200"
+    networks:
+      - ecommerce-network
+    depends_on:
+      - eureka-server
+    environment:
+      EUREKA.CLIENT.SERVICEURL.DEFAULTZONE: http://eureka-server:8761/eureka
+      SPRING.H2.CONSOLE.SETTINGS.WEB-ALLOW-OTHERS: true
+      # SPRING.ZIPKIN.BASEURL: http://zipkin-server:9411/
+
+  api-gateway:
+    image: jayptl08/microservices/e-commerce-api-gateway:0.0.1-SNAPSHOT
+    mem_limit: 700m
+    ports:
+      - "8765:8765"
+    networks:	
+      - ecommerce-network
+    depends_on:
+      - eureka-server
+    environment:
+      EUREKA.CLIENT.SERVICEURL.DEFAULTZONE: http://eureka-server:8761/eureka
+      # SPRING.ZIPKIN.BASEURL: http://zipkin-server:9411/
+ 
+  eureka-server:
+    image: jayptl08/microservices/e-commerce-eureka-server:0.0.1-SNAPSHOT
+    mem_limit: 700m
+    ports:
+      - "8761:8761"
+    networks:
+      - ecommerce-network
+
+  prometheus:
+    image: prom/prometheus:v2.37.1
+    container_name: prometheus
+    restart: unless-stopped
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+    depends_on:
+      - order-service
+      - product-catalog-service
+    networks:
+      - ecommerce-network
+
+  grafana:
+    image: grafana/grafana-oss:8.5.2
+    container_name: grafana
+    restart: unless-stopped
+    ports:
+      - "3100:3000"
+    links:
+      - prometheus:prometheus
+    volumes:
+      - ./grafana:/var/lib/grafana
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=password
+    networks:
+      - ecommerce-network
+   
+  # zipkin-server:
+  #   image: openzipkin/zipkin:2.23
+  #   mem_limit: 300m
+  #   ports:
+  #     - "9411:9411"
+  #   networks:
+  #     - currency-network
+  #   restart: always #Restart if there is a problem starting up
+
+networks:
+  ecommerce-network:

@@ -1,11 +1,13 @@
 package com.jayptl08.microservice.productcatalogservice.service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.jayptl08.microservice.productcatalogservice.dto.OrderItemReq;
+import com.jayptl08.microservice.productcatalogservice.dto.StockCheckRes;
 import com.jayptl08.microservice.productcatalogservice.model.ProductCatalog;
 import com.jayptl08.microservice.productcatalogservice.repository.ProductCatalogRepository;
 
@@ -49,16 +51,18 @@ public class ProductCatalogService {
         }
     }
 
-    public boolean checkStock(List<OrderItemReq> orderItems) {
+    public List<StockCheckRes> checkStock(List<OrderItemReq> orderItems) {
+
+        List<StockCheckRes> stockCheckRes = new ArrayList<>();
+
         for (int i = 0; i < orderItems.size(); i++) {
             Long productId = orderItems.get(i).getProductId();
             Integer quantity = orderItems.get(i).getQuantity();
             Integer stock = repository.findById(productId).get().getStock();
-            if((stock-quantity)<0){
-                return false;
-            }
+            StockCheckRes stockCheckRes2 = new StockCheckRes(productId, quantity, stock);
+            stockCheckRes.add(i, stockCheckRes2);
         }
-        return true;
+        return stockCheckRes;
     }
 
 }
